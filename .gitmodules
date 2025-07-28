@@ -1,0 +1,3 @@
+[submodule "NVIDIA-AI-Blueprints-rag"]
+	path = NVIDIA-AI-Blueprints-rag
+	url = https://github.com/Mazharul-Hossain/NVIDIA-AI-Blueprints-rag.git
