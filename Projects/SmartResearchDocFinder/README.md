@@ -46,3 +46,17 @@ Create an intelligent document search tool where users can ask questions in plai
 - Add document tagging and filtering (e.g., date, topic).
 - Train with company-specific language or jargon.
 - Implement a feedback loop to fine-tune search quality.
+
+## Ollama setup
+
+   ollama pull llama3.1:8b
+	ollama show llama3.1:8b
+
+## How to Run
+
+1. **Install Dependencies**:
+    ```bash
+    conda create --name leet_aider python=3.12
+    conda activate leet_aider
+    python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers
+    ```
