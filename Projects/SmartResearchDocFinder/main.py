@@ -1,4 +1,5 @@
 from ExtractTopKeywords import ExtractTopKeywords
+from semantic_scholar import SemanticScholar
 
 
 def main():
@@ -8,7 +9,7 @@ def main():
     counter, passage = 0, ""
     while True:
         line = input()
-        
+
         if line.strip() == "":
             if counter >= 1:
                 break
@@ -17,11 +18,15 @@ def main():
                 continue
         else:
             counter = 0
-            
+
         passage += line + " "
 
-    print("\nLLM-based keywords:")
-    print(extractor.rank_keywords(passage, top_k=5, method="llm"))
+    keywords = extractor.rank_keywords(passage, top_k=5, method="llm_hybrid")
+    print(f"\nLLM-based keywords: {keywords}.")
+
+    scholar = SemanticScholar()
+    scholar.create_corpas(keywords)
+
 
 if __name__ == "__main__":
     main()
