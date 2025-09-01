@@ -208,3 +208,4 @@ __marimo__/
 Projects/SmartResearchDocFinder/data/nltk
 Projects/SmartResearchDocFinder/ollama_response/
 Projects/SmartResearchDocFinder/scholar_response/
+.aider*

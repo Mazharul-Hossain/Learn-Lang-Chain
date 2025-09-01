@@ -11,6 +11,11 @@ REQUEST_DELAY_SECONDS = 2.0
 
 class SemanticScholar:
     def __init__(self):
+        """
+        Initializes the SemanticScholar library.
+
+        This method sets up the necessary directories and initializes variables for querying the Semantic Scholar API.
+        """
         print("Initializing the SemanticScholar library.")
 
         self.json_dir = "./scholar_response"
@@ -29,20 +34,29 @@ class SemanticScholar:
         # print(self.year, self.fields)
 
     def get_query(self, query: list):
+        """
+        Constructs a query string for the Semantic Scholar API.
+
+        Args:
+            query (list): A list of keywords or phrases to search for.
+
+        Returns:
+            str: The constructed query string.
+        """
         query = "+".join(query)
         encoded_query = urllib.parse.quote(query)
         return f"{self.url}?query={encoded_query}&year={self.year}&fields={self.fields}&limit=10"
 
     def query_semantic_scholar(self, query: list, json_path:str=""):
         """
-        Query the Ollama language model to get a response based on the given prompt.
+        Queries the Semantic Scholar API and returns the results.
 
         Args:
-            prompt (str): The prompt to send to the LLM.
-            model (str, optional): The name of the LLM model to use. Defaults to "llama3.1:8b".
+            query (list): A list of keywords or phrases to search for.
+            json_path (str, optional): The path where the JSON response should be saved. Defaults to an empty string.
 
         Returns:
-            str: The response from the LLM.
+            list: A list of dictionaries containing the search results.
         """
         url = self.get_query(query)
         headers = {"Content-Type": "application/json"}
@@ -59,6 +73,15 @@ class SemanticScholar:
         return list(json_data["data"])
 
     def create_corpas(self, query: list):
+        """
+        Creates a corpus of search results by querying the Semantic Scholar API for each pair of queries.
+
+        Args:
+            query (list): A list of keywords or phrases to search for.
+
+        Returns:
+            list: A list of dictionaries containing the search results.
+        """
         current_datetime = datetime.now()
         timestamp_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
 

@@ -3,6 +3,11 @@ from semantic_scholar import SemanticScholar
 
 
 def main():
+    """
+    Main function to execute the script.
+    It prompts the user to paste an abstract or literature, ranks keywords using a hybrid method,
+    and then creates corpora based on those keywords.
+    """
     extractor = ExtractTopKeywords()
 
     print("Paste the abstract/ literaure here:")

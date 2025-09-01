@@ -15,6 +15,9 @@ from NltkDownload import NltkDownload
 class ExtractTopKeywords:
 
     def __init__(self):
+        """
+        Initializes the NLTK library and loads the embedding model.
+        """
         print("Initializing the NLTK library.")
         nltk_download = NltkDownload()
         nltk.data.path.append(nltk_download.download_dir)
@@ -27,8 +30,15 @@ class ExtractTopKeywords:
 
     def extract_candidate_phrases(self, text, max_ngram=3):
         """
-        Split text into candidate keyphrases (1 to max_ngram words),
+        Splits the text into candidate keyphrases (1 to max_ngram words),
         filtering out stopwords.
+
+        Args:
+            text (str): The input text.
+            max_ngram (int, optional): Maximum number of words in a phrase. Defaults to 3.
+
+        Returns:
+            list: A list of unique candidate phrases.
         """
         words = nltk.word_tokenize(text.lower())
         sw = set(stopwords.words("english"))
@@ -41,10 +51,21 @@ class ExtractTopKeywords:
                 cand = " ".join(words[i : i + n])
                 candidates.append(cand)
 
-        # return unique phrases
+        # Return unique phrases
         return list(set(candidates))
 
     def get_embedding_rank_keywords(self, text, candidates, top_k=5):
+        """
+        Ranks candidate keywords by semantic similarity to the passage using embedding.
+
+        Args:
+            text (str): The input text.
+            candidates (list): A list of candidate keyphrases.
+            top_k (int, optional): Number of top keywords to return. Defaults to 5.
+
+        Returns:
+            list: A list of tuples containing the top keywords and their scores.
+        """
         # Encode passage and candidates
         text_emb = self.model.encode(text, convert_to_tensor=True)
         cand_embs = self.model.encode(candidates, convert_to_tensor=True)
@@ -58,7 +79,15 @@ class ExtractTopKeywords:
 
     def get_rank_by_frequency(self, text, candidates, top_k=5):
         """
-        Rank candidates by frequency count.
+        Ranks candidate keywords by frequency count.
+
+        Args:
+            text (str): The input text.
+            candidates (list): A list of candidate keyphrases.
+            top_k (int, optional): Number of top keywords to return. Defaults to 5.
+
+        Returns:
+            list: A list of tuples containing the top keywords and their scores.
         """
         words = nltk.word_tokenize(text.lower())
         counts = Counter(words)
@@ -71,6 +100,17 @@ class ExtractTopKeywords:
         return scored[:top_k]
 
     def get_rank_by_hybrid(self, text, candidates, top_k=5):
+        """
+        Ranks candidate keywords by a hybrid of embedding and frequency count.
+
+        Args:
+            text (str): The input text.
+            candidates (list): A list of candidate keyphrases.
+            top_k (int, optional): Number of top keywords to return. Defaults to 5.
+
+        Returns:
+            list: A list of the top keywords.
+        """
         # Get both scores
         emb_ranking = dict(
             self.get_embedding_rank_keywords(text, candidates, top_k * 2)
@@ -96,20 +136,21 @@ class ExtractTopKeywords:
 
     def build_prompt(self, text, top_k=5, retrieved_contexts=[]):
         """
-        Build a prompt by combining the new problem text with similar problems.
+        Builds a prompt for the LLM by combining the new problem text with similar problems.
 
         Args:
-            new_problem_text (str): The new problem statement to solve.
-            retrieved_contexts (list): A list of dictionaries containing metadata for similar problems.
+            text (str): The new problem statement to solve.
+            top_k (int, optional): Number of top keywords to include in the prompt. Defaults to 5.
+            retrieved_contexts (list, optional): A list of dictionaries containing metadata for similar problems. Defaults to an empty list.
 
         Returns:
             str: The constructed prompt for the LLM.
         """
-        prompt = "You are a technical literature summarization assistant. You are great at finding most relevent keywords from technical articles, when asked you provide the top keywords in a comma separated list. A keyword should be a clean and concise phrase consisting of one to three words."
+        prompt = "You are a technical literature summarization assistant. You are great at finding most relevant keywords from technical articles, when asked you provide the top keywords in a comma separated list. A keyword should be a clean and concise phrase consisting of one to three words."
         prompt += f"\nExtract keywords from this passage: {text}\n"
 
         if len(retrieved_contexts) > 0:
-            prompt += "\nFor reference, these are the relevent keyword I extracted using all-MiniLM-L6-v2: "
+            prompt += "\nFor reference, these are the relevant keywords I extracted using all-MiniLM-L6-v2: "
 
         for i, ctx in enumerate(retrieved_contexts):
             prompt += f" Keyword {i+1}: {ctx}, "
@@ -120,7 +161,7 @@ class ExtractTopKeywords:
 
     def query_ollama(self, prompt, model="llama3.1:8b"):
         """
-        Query the Ollama language model to get a response based on the given prompt.
+        Queries the Ollama language model to get a response based on the given prompt.
 
         Args:
             prompt (str): The prompt to send to the LLM.
@@ -154,6 +195,17 @@ class ExtractTopKeywords:
         return json_data["response"]
 
     def get_llm_rank_keywords(self, text, top_k=5, retrieved_contexts=[]):
+        """
+        Retrieves the top keywords using the LLM.
+
+        Args:
+            text (str): The input text.
+            top_k (int, optional): Number of top keywords to return. Defaults to 5.
+            retrieved_contexts (list, optional): A list of dictionaries containing metadata for similar problems. Defaults to an empty list.
+
+        Returns:
+            list: A list of the top keywords.
+        """
         prompt = self.build_prompt(text, top_k, retrieved_contexts)
         response = self.query_ollama(prompt)
         print(f"LLM Response: {response}")
@@ -172,8 +224,15 @@ class ExtractTopKeywords:
 
     def rank_keywords(self, text, top_k=5, method="embedding"):
         """
-        Rank candidate keywords by semantic similarity to the passage.
-        method = 'embedding' (Sentence-Transformers) or 'llm' (if you integrate your LLM).
+        Ranks candidate keywords by semantic similarity to the passage.
+
+        Args:
+            text (str): The input text.
+            top_k (int, optional): Number of top keywords to return. Defaults to 5.
+            method (str, optional): Method for ranking keywords ('embedding', 'frequency', 'hybrid', 'llm', 'llm_hybrid'). Defaults to "embedding".
+
+        Returns:
+            list: A list of the top keywords.
         """
         text = text.replace("\n", " ")
         text = re.sub(r"\s+", " ", text)
