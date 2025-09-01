@@ -8,9 +8,7 @@ def main():
     It prompts the user to paste an abstract or literature, ranks keywords using a hybrid method,
     and then creates corpora based on those keywords.
     """
-    extractor = ExtractTopKeywords()
-
-    print("Paste the abstract/ literaure here:")
+    print("Paste the abstract/ literature here:")
     counter, passage = 0, ""
     while True:
         line = input()
@@ -26,11 +24,12 @@ def main():
 
         passage += line + " "
 
+    extractor = ExtractTopKeywords()
     keywords = extractor.rank_keywords(passage, top_k=5, method="llm_hybrid")
     print(f"\nLLM-based keywords: {keywords}.")
 
     scholar = SemanticScholar()
-    scholar.create_corpas(keywords)
+    scholar.create_corpus(passage, keywords)
 
 
 if __name__ == "__main__":

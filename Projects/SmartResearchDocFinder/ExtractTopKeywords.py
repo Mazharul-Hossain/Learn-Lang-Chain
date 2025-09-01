@@ -3,13 +3,9 @@ import nltk
 from nltk.corpus import stopwords
 from collections import Counter
 from sentence_transformers import SentenceTransformer, util
-import requests
-import json
-import os
 from sentence_transformers import SentenceTransformer
-import requests
-from datetime import datetime
 from NltkDownload import NltkDownload
+from helper import query_ollama
 
 
 class ExtractTopKeywords:
@@ -24,9 +20,6 @@ class ExtractTopKeywords:
 
         # Load embedding model (you can swap for a local LLM embedding generator)
         self.model = SentenceTransformer("all-MiniLM-L6-v2")  # small & fast
-
-        self.json_dir = "./ollama_response"
-        os.makedirs(self.json_dir, exist_ok=True)
 
     def extract_candidate_phrases(self, text, max_ngram=3):
         """
@@ -159,41 +152,6 @@ class ExtractTopKeywords:
 
         return prompt
 
-    def query_ollama(self, prompt, model="llama3.1:8b"):
-        """
-        Queries the Ollama language model to get a response based on the given prompt.
-
-        Args:
-            prompt (str): The prompt to send to the LLM.
-            model (str, optional): The name of the LLM model to use. Defaults to "llama3.1:8b".
-
-        Returns:
-            str: The response from the LLM.
-        """
-        url = "http://localhost:11434/api/generate"
-        headers = {"Content-Type": "application/json"}
-        payload = {"model": model, "prompt": prompt, "stream": False}
-        if "deepseek" in model:
-            # https://ollama.com/blog/thinking
-            payload["think"] = False
-
-        response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        json_data = response.json()
-        try:
-            del json_data["context"]
-        except:
-            pass
-
-        current_datetime = datetime.now()
-        timestamp_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
-        json_path = os.path.join(self.json_dir, f"{timestamp_str}.json")
-        with open(json_path, "w", encoding="utf-8") as jf:
-            json_data["prompt"] = prompt
-            json.dump(json_data, jf, indent=2)
-
-        return json_data["response"]
-
     def get_llm_rank_keywords(self, text, top_k=5, retrieved_contexts=[]):
         """
         Retrieves the top keywords using the LLM.
@@ -207,7 +165,7 @@ class ExtractTopKeywords:
             list: A list of the top keywords.
         """
         prompt = self.build_prompt(text, top_k, retrieved_contexts)
-        response = self.query_ollama(prompt)
+        response = query_ollama(prompt)
         print(f"LLM Response: {response}")
 
         keywords = response.split("\n")
