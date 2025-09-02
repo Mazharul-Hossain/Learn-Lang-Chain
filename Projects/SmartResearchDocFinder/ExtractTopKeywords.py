@@ -3,7 +3,6 @@ import nltk
 from nltk.corpus import stopwords
 from collections import Counter
 from sentence_transformers import SentenceTransformer, util
-from sentence_transformers import SentenceTransformer
 from NltkDownload import NltkDownload
 from helper import query_ollama
 
@@ -89,7 +88,6 @@ class ExtractTopKeywords:
             key=lambda x: x[1],
             reverse=True,
         )
-        # print(f"Ranking candidates by frequency count: {scored[:2*top_k]}")
         return scored[:top_k]
 
     def get_rank_by_hybrid(self, text, candidates, top_k=5):
@@ -177,7 +175,7 @@ class ExtractTopKeywords:
                     k = k.split(":")[-1]
                     new_keywords.append(k.strip().lower())
                 return new_keywords
-        
+
         return []
 
     def rank_keywords(self, text, top_k=5, method="embedding"):
@@ -214,7 +212,7 @@ class ExtractTopKeywords:
 
         elif method == "llm_hybrid":
             scored = self.get_embedding_rank_keywords(text, candidates, top_k)
-            keywords =  [kw for kw, _ in scored]
+            keywords = [kw for kw, _ in scored]
             return self.get_llm_rank_keywords(text, top_k, keywords)
 
 

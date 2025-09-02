@@ -17,11 +17,7 @@ class NltkDownload:
         :param download_dir: Directory where the NLTK data will be stored. Defaults to './data/nltk/'.
         """
         if list_of_resources is None:
-            list_of_resources = [
-                "stopwords",
-                "punkt",
-                "punkt_tab"
-            ]
+            list_of_resources = ["stopwords", "punkt", "punkt_tab"]
 
         self.download_dir = download_dir
         if download_dir is None:

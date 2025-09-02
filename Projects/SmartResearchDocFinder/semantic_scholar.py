@@ -169,6 +169,16 @@ class SemanticScholar:
                 print(traceback.format_exc())
 
     def create_corpus(self, text, query: list):
+        """
+        Creates a corpus of search results by querying the Semantic Scholar API for each pair of queries.
+
+        Args:
+            text (str): The new problem statement to solve.
+            query (list): A list of keywords or phrases to search for.
+
+        Returns:
+            None
+        """
         text = text.replace("\n", " ")
         self.text = re.sub(r"\s+", " ", text)
         self.text = self.text.lower()
@@ -195,6 +205,15 @@ class SemanticScholar:
             json.dump(json_data, jf, indent=2)
 
     def test_consumer(self, text):
+        """
+        Tests the consumer task by feeding it a predefined set of data.
+
+        Args:
+            text (str): The new problem statement to solve.
+
+        Returns:
+            None
+        """
         text = text.replace("\n", " ")
         self.text = re.sub(r"\s+", " ", text)
         self.text = self.text.lower()

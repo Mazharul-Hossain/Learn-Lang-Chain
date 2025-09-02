@@ -1,7 +1,6 @@
 import requests
 import json
 import os
-import requests
 from datetime import datetime
 
 
@@ -47,6 +46,15 @@ def query_ollama(prompt, model="llama3.1:8b", json_dir=None):
 
 
 def extract_json_info(text):
+    """
+    Extracts JSON information from a given text.
+
+    Args:
+        text (str): The text containing the JSON data.
+
+    Returns:
+        dict or None: The extracted JSON data as a dictionary if successful; otherwise, None.
+    """
     # Extract the JSON part from the text
     start_index = text.find("```json") + len("```json")
     end_index = text.find("```", start_index)
