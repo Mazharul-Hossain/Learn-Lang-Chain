@@ -11,7 +11,7 @@ import itertools
 import urllib.parse
 from datetime import datetime
 from dotenv import load_dotenv
-from helper import query_ollama
+from helper import extract_json_info, query_ollama
 
 REQUEST_DELAY_SECONDS = 2.0
 # A sentinel object to signal the consumer to stop
@@ -31,8 +31,8 @@ class SemanticScholar:
         os.makedirs(self.json_dir, exist_ok=True)
 
         # Load variables from .env
-        load_dotenv() 
-        self.api_key = os.getenv('API_KEY')
+        load_dotenv()
+        self.api_key = os.getenv("API_KEY")
 
         self.url = "https://api.semanticscholar.org/graph/v1/paper/search"
 
@@ -64,7 +64,7 @@ class SemanticScholar:
         encoded_query = urllib.parse.quote(query)
         return f"{self.url}?query={encoded_query}&year={self.year}&fields={self.fields}&limit=10"
 
-    def query_semantic_scholar(self, query: list, json_path:str=""):
+    def query_semantic_scholar(self, query: list, json_path: str = ""):
         """
         Queries the Semantic Scholar API and returns the results.
 
@@ -76,7 +76,7 @@ class SemanticScholar:
             list: A list of dictionaries containing the search results.
         """
         url = self.get_query(query)
-        headers = {"Content-Type": "application/json", "x-api-key":self.api_key}
+        headers = {"Content-Type": "application/json", "x-api-key": self.api_key}
 
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -89,7 +89,7 @@ class SemanticScholar:
 
         return list(json_data["data"])
 
-    def build_prompt(self, retrieved_context:str):
+    def build_prompt(self, retrieved_context: str):
         """
         Builds a prompt for the LLM by combining the new problem text with similar problems.
 
@@ -99,14 +99,14 @@ class SemanticScholar:
         Returns:
             str: The constructed prompt for the LLM.
         """
-        prompt = "You are a technical synopsis assistant. You excel at identifying the technical relevance between two passages. You will receive an original passage along with a second passage from different sources. When asked, you will compare two passages to determine their relevance and must respond in JSON format. First `relevant` key in True or False. If they are relevant, set the `relevant` key to True and write a clean and concise passage consisting of one to three sentences with at most fifty words in the second `summary` key."
+        prompt = "You are a technical synopsis assistant. You excel at identifying the technical relevance between two passages. You will receive an original passage along with a second passage from different sources. When asked, you will compare two passages to determine their relevance and must respond in JSON format that starts with ```json. First `relevant` key in True or False. If they are relevant, set the `relevant` key to True and write a synopsis of the second passage in clean and concise paragraph consisting of one to three sentences with at most fifty words in the second `summary` key."
 
         prompt += f"\nHere is the original passage: {self.text}\n"
         prompt += f"\n---\nHere is the second passage: {retrieved_context.lower()}\n"
         prompt += f"\n---\nNow, provide me the JSON response."
 
         return prompt
-    
+
     def _producer_task(self, query: list):
         """
         Creates a corpus of search results by querying the Semantic Scholar API for each pair of queries.
@@ -126,7 +126,7 @@ class SemanticScholar:
         for i, q in combinations_4c2:
             if i > 0:
                 # sleep with added jitter
-                time.sleep(delay + random.uniform(0, delay * 0.1)) 
+                time.sleep(delay + random.uniform(0, delay * 0.1))
 
                 # Exponential increase is 2
                 delay *= 1.5
@@ -141,23 +141,30 @@ class SemanticScholar:
                     self.queue.put(item)
             except:
                 print(traceback.format_exc())
-    
+
     def _consumer_task(self, consumer_id=0):
         """Task run by a consumer thread."""
         while True:
             item = self.queue.get()
             if item is STOP_SIGNAL:
                 # Put the signal back for other consumers before exiting
-                self.queue.put(STOP_SIGNAL) 
+                self.queue.put(STOP_SIGNAL)
                 print(f"Consumer-{consumer_id}: Exiting.")
                 break
             self.queue.task_done()
 
             try:
-                prompt = self.build_prompt(item["abstract"])
+                abstract = item["abstract"]
+                if not abstract:
+                    print(f'\n# Missing {item["paperId"]}: {item["title"]}')
+                    continue
+
+                prompt = self.build_prompt(abstract)
                 response = query_ollama(prompt)
-                if response["relevant"]:
-                    self.results.append(response["summary"])
+                response = extract_json_info(response)
+                if response and response["relevant"]:
+                    item["summary"] = response["summary"]
+                    self.results.append(item)
             except:
                 print(traceback.format_exc())
 
@@ -165,7 +172,7 @@ class SemanticScholar:
         text = text.replace("\n", " ")
         self.text = re.sub(r"\s+", " ", text)
         self.text = self.text.lower()
-        
+
         producer = threading.Thread(target=self._producer_task, args=(query,))
         producer.start()
 
@@ -173,11 +180,19 @@ class SemanticScholar:
         consumer.start()
 
         producer.join()
-        print("All producers have finished. Signaling consumers to stop.")        
+        print("All producers have finished. Signaling consumers to stop.")
         self.queue.put(STOP_SIGNAL)
 
         consumer.join()
         print("Producer-consumer system has shut down gracefully.")
+
+        current_datetime = datetime.now()
+        timestamp_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+
+        json_path = os.path.join(self.json_dir, f"LLM_relevence_{timestamp_str}.json")
+        with open(json_path, "w", encoding="utf-8") as jf:
+            json_data = {"data": self.results}
+            json.dump(json_data, jf, indent=2)
 
     def test_consumer(self, text):
         text = text.replace("\n", " ")
@@ -187,13 +202,22 @@ class SemanticScholar:
         consumer = threading.Thread(target=self._consumer_task)
         consumer.start()
 
-        data = []
+        json_path = "./scholar_response/2025-09-01_13-35-59_02.json"
+        with open(json_path, encoding="utf-8") as jf:
+            json_data = json.load(jf)
+
+        data = json_data["data"]
         for item in data:
-            self.queue.put(item)   
+            self.queue.put(item)
         self.queue.put(STOP_SIGNAL)
 
         consumer.join()
         print("Producer-consumer system has shut down gracefully.")
+
+        json_path = os.path.join(self.json_dir, "LLM_relevence.json")
+        with open(json_path, "w", encoding="utf-8") as jf:
+            json_data = {"data": self.results}
+            json.dump(json_data, jf, indent=2)
 
 
 def main():
@@ -224,4 +248,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    

@@ -66,5 +66,5 @@ Create an intelligent document search tool where users can ask questions in plai
     conda create --name leet_aider python=3.12
     
     conda activate leet_aider
-    python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk --upgrade
+    python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
     ```

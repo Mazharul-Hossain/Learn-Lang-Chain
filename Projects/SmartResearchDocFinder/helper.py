@@ -20,7 +20,7 @@ def query_ollama(prompt, model="llama3.1:8b", json_dir=None):
     if json_dir is None:
         json_dir = "./ollama_response"
     os.makedirs(json_dir, exist_ok=True)
-    
+
     url = "http://localhost:11434/api/generate"
     headers = {"Content-Type": "application/json"}
     payload = {"model": model, "prompt": prompt, "stream": False}
@@ -44,3 +44,20 @@ def query_ollama(prompt, model="llama3.1:8b", json_dir=None):
         json.dump(json_data, jf, indent=2)
 
     return json_data["response"]
+
+
+def extract_json_info(text):
+    # Extract the JSON part from the text
+    start_index = text.find("```json") + len("```json")
+    end_index = text.find("```", start_index)
+    json_str = text[start_index:end_index].strip()
+
+    # Parse the JSON string
+    try:
+        json_data = json.loads(json_str)
+        return json_data
+    except json.JSONDecodeError as e:
+        print(f"Failed to decode JSON: {e}")
+        print(f"{start_index} to {end_index} json_str: {json_str}. \n\n{text}")
+
+        return None
