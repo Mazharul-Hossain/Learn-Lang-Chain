@@ -14,25 +14,25 @@ Create an intelligent document search tool where users can ask questions in plai
 ## Step-by-Step Design Process
 
 1. Data Ingestion & Preprocessing
-   - Upload PDFs, docs, or scraped text.
-   - Chunk documents (e.g., 500–1000 tokens) for more accurate embedding.
-   - Generate embeddings for each chunk using Langchain’s wrapper around an embedding model (OpenAI, Hugging Face, etc.).
-   - Store all vector embeddings with references in FAISS DB.
+    - Upload PDFs, docs, or scraped text.
+    - Chunk documents (e.g., 500–1000 tokens) for more accurate embedding.
+    - Generate embeddings for each chunk using Langchain’s wrapper around an embedding model (OpenAI, Hugging Face, etc.).
+    - Store all vector embeddings with references in FAISS DB.
 
 2. Semantic Search
-   - User inputs a natural language query (e.g., “What are the benefits of AI in logistics?”)
-   - Langchain converts the query into an embedding vector.
-   - FAISS searches for top N most semantically similar document chunks.
+    - User inputs a natural language query (e.g., “What are the benefits of AI in logistics?”)
+    - Langchain converts the query into an embedding vector.
+    - FAISS searches for top N most semantically similar document chunks.
 
 3. Intelligent Answering
-   - Langchain passes retrieved chunks as context to the LLM.
-   - The LLM then: Summarizes, Extracts answers, Or holds a conversation about the documents
+    - Langchain passes retrieved chunks as context to the LLM.
+    - The LLM then: Summarizes, Extracts answers, Or holds a conversation about the documents
 
 4. UI & Interaction
-   - Display top results with:
-   - Highlighted source chunks
-   - Direct answer
-   - Option to “ask follow-up” or "read more".
+    - Display top results with:
+    - Highlighted source chunks
+    - Direct answer
+    - Option to “ask follow-up” or "read more".
 
 ## Real-World Applications
 
@@ -62,9 +62,7 @@ Create an intelligent document search tool where users can ask questions in plai
 
 1. **Install Dependencies**:
 
-    ```bash
-    conda create --name leet_aider python=3.12
-    
-    conda activate leet_aider
-    python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
-    ```
+        conda create --name leet_aider python=3.12
+
+        conda activate leet_aider
+        python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
