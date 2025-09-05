@@ -62,7 +62,7 @@ class SemanticScholar:
         """
         query = "+".join(query)
         encoded_query = urllib.parse.quote(query)
-        return f"{self.url}?query={encoded_query}&year={self.year}&fields={self.fields}&limit=10"
+        return f"{self.url}?query={encoded_query}&year={self.year}&fields={self.fields}&limit=20"
 
     def query_semantic_scholar(self, query: list, json_path: str = ""):
         """
@@ -123,7 +123,7 @@ class SemanticScholar:
         delay = REQUEST_DELAY_SECONDS
         combinations_4c2 = list(itertools.combinations(query[1:], 2))
 
-        for i, q in combinations_4c2:
+        for i, q in enumerate(combinations_4c2):
             if i > 0:
                 # sleep with added jitter
                 time.sleep(delay + random.uniform(0, delay * 0.1))

@@ -146,7 +146,7 @@ class ExtractTopKeywords:
         for i, ctx in enumerate(retrieved_contexts):
             prompt += f" Keyword {i+1}: {ctx}, "
 
-        prompt += f"\n---\nNow, provide the top {top_k} most relevant keywords in descending order of their relevance. Your response must end with the keywords as a comma-separated list."
+        prompt += f"\n---\nNow, provide the top {top_k} most relevant keywords as a comma-separated list in descending order of their relevance."
 
         return prompt
 
