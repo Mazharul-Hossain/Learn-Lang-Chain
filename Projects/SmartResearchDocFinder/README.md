@@ -23,23 +23,21 @@ literature. It leverages natural language processing (NLP) techniques to identif
 ## Installation
 
 1. **Install Dependencies**:
-
-        ```bash
-        conda create --name leet_aider python=3.12
-        
-        conda activate leet_aider
-        python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
-        ```
+    ```bash
+    conda create --name leet_aider python=3.12
+    
+    conda activate leet_aider
+    python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
+    ```
 2. Set up environment variables in `.env` (e.g., `API_KEY` for Semantic Scholar)
 
 ## Usage
 
 1. Run the main script to extract keywords and create a corpus:
-
-        ```bash
-        python main.py
-        ```
-
+    ```bash
+    screen -L
+    python main.py
+    ```
 2. Paste an abstract or literature when prompted.
 3. The script will output the top keywords and create a JSON file with relevant papers.
 
@@ -99,23 +97,3 @@ Create an intelligent document search tool where users can ask questions in plai
 - Add document tagging and filtering (e.g., date, topic).
 - Train with company-specific language or jargon.
 - Implement a feedback loop to fine-tune search quality.
-
-## Ollama setup
-
-    ollama pull llama3.1:8b
-    ollama show llama3.1:8b --modelfile > Modelfile
-
-        FROM llama3.1:8b
-        PARAMETER num_ctx 65536
-        
-    ollama create llama3.1:8b -f Modelfile
-    ollama show llama3.1:8b
-
-## How to Run
-
-1. **Install Dependencies**:
-
-        conda create --name leet_aider python=3.12
-
-        conda activate leet_aider
-        python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
