@@ -48,7 +48,7 @@ class SemanticScholar:
 
         self.queue = queue.Queue(maxsize=10)
         self.text = text
-        self.results = []
+        self.results = {}
 
     def get_query(self, query: list):
         """
@@ -159,12 +159,15 @@ class SemanticScholar:
                     print(f'\n# Missing {item["paperId"]}: {item["title"]}')
                     continue
 
+                if item["paperId"] in self.results:
+                    continue
+
                 prompt = self.build_prompt(abstract)
                 response = query_ollama(prompt)
                 response = extract_json_info(response)
                 if response and response["relevant"]:
                     item["summary"] = response["summary"]
-                    self.results.append(item)
+                    self.results[item["paperId"]] = item
             except:
                 print(traceback.format_exc())
 
@@ -196,13 +199,23 @@ class SemanticScholar:
         consumer.join()
         print("Producer-consumer system has shut down gracefully.")
 
+    def save_corpus(self):
+        """
+        Creates a corpus of search results by querying the Semantic Scholar API for each pair of queries.
+
+        Args:
+            text (str): The new problem statement to solve.
+            query (list): A list of keywords or phrases to search for.
+
+        Returns:
+            None
+        """
         current_datetime = datetime.now()
         timestamp_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
 
         json_path = os.path.join(self.json_dir, f"LLM_relevence_{timestamp_str}.json")
         with open(json_path, "w", encoding="utf-8") as jf:
-            json_data = {"data": self.results}
-            json.dump(json_data, jf, indent=2)
+            json.dump(self.results, jf, indent=2)
 
     def test_consumer(self, text):
         """
@@ -233,10 +246,7 @@ class SemanticScholar:
         consumer.join()
         print("Producer-consumer system has shut down gracefully.")
 
-        json_path = os.path.join(self.json_dir, "LLM_relevence.json")
-        with open(json_path, "w", encoding="utf-8") as jf:
-            json_data = {"data": self.results}
-            json.dump(json_data, jf, indent=2)
+        self.save_corpus()
 
 
 def main():
