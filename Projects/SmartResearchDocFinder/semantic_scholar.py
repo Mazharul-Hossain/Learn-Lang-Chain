@@ -201,11 +201,7 @@ class SemanticScholar:
 
     def save_corpus(self):
         """
-        Creates a corpus of search results by querying the Semantic Scholar API for each pair of queries.
-
-        Args:
-            text (str): The new problem statement to solve.
-            query (list): A list of keywords or phrases to search for.
+        Saves the corpus of search results to a JSON file.
 
         Returns:
             None
