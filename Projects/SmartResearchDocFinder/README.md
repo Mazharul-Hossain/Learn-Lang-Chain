@@ -24,19 +24,22 @@ literature. It leverages natural language processing (NLP) techniques to identif
 
 1. **Install Dependencies**:
 
-    ```bash
-    conda create --name leet_aider python=3.12
-    
-    conda activate leet_aider
-    python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
-    ```
+        ```bash
+        conda create --name leet_aider python=3.12
+        
+        conda activate leet_aider
+        python -m pip install pandas requests beautifulsoup4 faiss-cpu sentence-transformers nltk python-dotenv --upgrade
+        ```
 2. Set up environment variables in `.env` (e.g., `API_KEY` for Semantic Scholar)
 
 ## Usage
 
 1. Run the main script to extract keywords and create a corpus:
-   ```bash
-   python main.py
+
+        ```bash
+        python main.py
+        ```
+
 2. Paste an abstract or literature when prompted.
 3. The script will output the top keywords and create a JSON file with relevant papers.
 
